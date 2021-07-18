@@ -1,9 +1,9 @@
-#####ROLI-tyos
+##### ROLI-toys
 
 To install:
 Copy the .littlefoot file to your Documents/ROLI/Littlefoot/ directory.
 
-###Shift Register
+### Shift Register
 A 16-bit shift array, based on the Turing Machine eurorack module by Tom Whitwell. Outputs MIDI note with velocity over USB. Fixed velocity option available through the ROLI Dashboard.
 
 Physical Button:
