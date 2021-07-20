@@ -1,0 +1,327 @@
+/*
+<metadata description="Tilt-O-Whirl"
+    details="Inspired by the Tombola sequencer by Teenage Engineering."
+    target="Lightpad"
+    tags="MIDI;Generator;">
+    <groups>
+        <group name="note"    displayName="Notes" />
+        <group name="colour"    displayName="Colors" />
+    </groups>
+    <variables>
+        <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" />
+
+        <variable group="note" name="note0" displayName="Note 1" type="midiNote" value="A2" />
+        <variable group="note" name="note1" displayName="Note 2" type="midiNote" value="C3" />
+        <variable group="note" name="note2" displayName="Note 3" type="midiNote" value="E3" />
+        <variable group="note" name="note3" displayName="Note 4" type="midiNote" value="G3" />
+        <variable group="note" name="note4" displayName="Note 5" type="midiNote" value="A3" />
+        <variable group="note" name="note5" displayName="Note 6" type="midiNote" value="C4$" />
+        <variable group="note" name="note6" displayName="Note 7" type="midiNote" value="E4" />
+        <variable group="note" name="note7" displayName="Note 8" type="midiNote" value="G4" />
+
+        <variable group="colour" name="colour0" displayName="Color 1" type="colour" value="0xFF0000" />
+        <variable group="colour" name="colour1" displayName="Color 2" type="colour" value="0xFF8000" />
+        <variable group="colour" name="colour2" displayName="Color 3" type="colour" value="0xFFFF00" />
+        <variable group="colour" name="colour3" displayName="Color 4" type="colour" value="0x008000" />
+        <variable group="colour" name="colour4" displayName="Color 5" type="colour" value="0x0000FF" />
+        <variable group="colour" name="colour5" displayName="Color 6" type="colour" value="0x4B0082" />
+        <variable group="colour" name="colour6" displayName="Color 7" type="colour" value="0xEE82EE" />
+        <variable group="colour" name="colour7" displayName="Color 8" type="colour" value="0xFFFFFF" />
+
+        <variable name="friction" displayName="Friction" type="float" min="0" max="1" value="0.001" />
+    </variables>
+</metadata>
+*/
+
+int ballX[8], ballY[8], velX[8], velY[8];        // oversample grid (2^16)x
+bool ballLive[8], ballBounce[8];
+
+int note[8], colour[8];
+
+int ballHeld;
+bool grab;
+
+int accX, accY, spinCount;
+bool hasResetOnce;
+
+int frameCounter;
+
+void sendAllNotesOff()
+{
+    for (int i = 0; i<127; ++i)
+    {
+        sendNoteOff(0, i, 0);
+    }
+}
+
+void initialise()
+{
+    clearDisplay();
+    sendAllNotesOff();
+
+    ballHeld = 0;
+    grab = false;
+    killAll();
+
+    if (! hasResetOnce)
+    {
+        setAcc();
+        setColourArray();
+        setNoteArray();
+        hasResetOnce = true;
+    }
+}
+
+void setAcc()
+{
+    accX = 0;
+    accY = 1<<13;
+}
+
+void setNoteArray()
+{
+    note[0] = note0;
+    note[1] = note1;
+    note[2] = note2;
+    note[3] = note3;
+    note[4] = note4;
+    note[5] = note5;
+    note[6] = note6;
+    note[7] = note7;
+}
+
+void setColourArray()
+{
+    colour[0] = colour0;
+    colour[1] = colour1;
+    colour[2] = colour2;
+    colour[3] = colour3;
+    colour[4] = colour4;
+    colour[5] = colour5;
+    colour[6] = colour6;
+    colour[7] = colour7;
+}
+
+void killAll()
+{
+    for (int num = 0; num < 8; ++num)
+    {
+        ballLive[num] = false;
+    }
+}
+
+void handleButtonDown(int index)
+{
+    initialise();
+}
+
+void rotate()
+{
+    float newX, newY;
+
+    newX = 0.9952*accX - 0.0980*accY;    // rotation matrix
+    newY = 0.0980*accX + 0.9952*accY;    // theta = pi/32
+
+    spinCount = (spinCount+1) % 64;
+    log(spinCount);
+
+    if (spinCount == 0)
+    {
+        setAcc();
+    }
+    else
+    {
+        accX = int (newX);
+        accY = int (newY);
+    }
+}
+
+void applyFriction(int num)
+{
+    int temp = velX[num];                // circumvent int array * float = 0 bug
+    
+    velX[num] = int (temp*(1 - friction));
+    temp = velY[num];
+    velY[num] = int (temp*(1 - friction));
+
+}
+
+void updateBall(int num)
+{
+    velX[num] += accX;
+    velY[num] += accY;
+    
+    if (friction != 0.0)
+    {
+        applyFriction(num);
+    }
+
+    ballX[num] += velX[num];
+    ballY[num] += velY[num];
+
+    if (ballX[num] < 0 || ballX[num] > 14<<16)
+    {
+        ballX[num] = (ballX[num] < 0) ? (-ballX[num]) % (14<<16) : 14<<16 - (ballX[num] % 14<<16);
+        velX[num] *= -1;
+                
+        if (abs(velX[num]) > 1<<13)
+        {
+            ballBounce[num] = true;
+        }
+    }
+    if (ballY[num] < 0 || ballY[num] > 14<<16)
+    {
+        ballY[num] = (ballY[num] < 0) ? (-ballY[num]) % (14<<16) : 14<<16 - (ballY[num] % 14<<16);
+        velY[num] *= -1;
+                
+        if (abs(velY[num]) > 1<<13)
+        {
+            ballBounce[num] = true;
+        }
+    }
+}
+
+void drawBall(int num)
+{
+    if (ballBounce[num])
+    {
+        blendCircle(0xff000000 + (colour[num] | 0x808080), float (ballX[num]) / (1<<16), float (ballY[num]) / (1<<16), 0.5, true);
+        sendNoteOn(channel-1, note[num], 127);
+    }
+    fillPixel(colour[num], ballX[num]>>16, ballY[num]>>16);
+}
+
+void drawSlope()
+{
+    int NW, NE, SW, SE;
+    NW = dotProduct( 1, 1)>>9;
+    NW = makeARGB(0xff, NW, NW, NW);
+
+    NE = dotProduct(-1, 1)>>9;
+    NE = makeARGB(0xff, NE, NE, NE);
+
+    SE = dotProduct(-1,-1)>>9;
+    SE = makeARGB(0xff, SE, SE, SE);
+
+    SW = dotProduct( 1,-1)>>9;
+    SW = makeARGB(0xff, SW, SW, SW);
+
+    blendGradientRect(NW, NE, SE, SW, 0, 0, 15, 15);
+}
+
+int dotProduct(int coordX, int coordY)
+{
+    return max(128, coordX*accX + coordY*accY)
+}
+
+void physics()
+{
+    frameCounter = (frameCounter+1) % 1;
+    if (frameCounter == 0)
+    {
+        rotate();
+    }
+    for (int num = 0; num < 8; ++num)
+    {
+        if (ballLive[num])
+        {
+            updateBall(num);
+        }
+    }
+}
+
+void draw()
+{
+    drawSlope();
+    for (int num = 0; num < 8; ++num)
+    {
+        if (ballLive[num])
+        {
+            drawBall(num);
+        }
+    }
+}
+
+void cleanup()
+{
+    for (int num = 0; num < 8; ++num)
+    {
+        if (ballBounce[num])
+        {
+            ballBounce[num] = false;
+            sendNoteOff(channel-1,note[num],0);
+        }
+    }
+}
+
+int getCoord(float x)
+{
+    return int ((x*7 + 0.5) * (1<<16))
+}
+
+void throwStart(float x, float y)
+{
+    ballX[ballHeld] =  getCoord(x);
+    ballY[ballHeld] = getCoord(y);
+}
+
+void throwEnd(float x, float y)
+{
+    if (0 <= ballHeld <= 7)
+    {
+        velX[ballHeld] = (getCoord(x) - ballX[ballHeld])/3;
+        velY[ballHeld] = (getCoord(y) - ballY[ballHeld])/3;
+        ballLive[ballHeld] = true;
+    }
+}
+
+void grabDeadBall()
+{
+    grab = false;
+    for (int num = 0; num < 8; ++num)
+    {
+        if (!ballLive[num])
+        {
+            ballHeld = num;
+            grab = true;
+            break;
+        }
+    }
+}
+
+void touchStart (int index, float x, float y, float z, float vz)
+{
+    if (index == 1)
+    {
+        grabDeadBall();
+        if (grab)
+        {
+            throwStart(x, y);
+        }
+    }
+}
+
+void touchMove (int index, float x, float y, float z, float vz)
+{
+    if (index == 1 && grab)
+    {
+        drawBall(ballHeld);
+    }
+}
+
+void touchEnd (int index, float x, float y, float z, float vz)
+{
+    if (index == 1 && grab)
+    {
+        throwEnd(x, y);
+        grab = false;
+    }
+}
+
+void repaint()
+{
+    clearDisplay();
+    physics();
+    draw();
+    cleanup();
+}
