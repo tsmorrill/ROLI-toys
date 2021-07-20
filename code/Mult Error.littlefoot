@@ -1,0 +1,26 @@
+/*    
+<metadata description="Demonstrate array multiplication bug.">
+</metadata>
+*/
+
+int intArray[1];
+float floatArray[1];
+
+void initialise()
+{
+    clearDisplay(0x000008);
+    intArray[0] = 1;
+    floatArray[0] = 1.0;
+}
+
+
+void repaint()
+{
+    fillRect((int(intArray[0]*1) == 0) ? 0xff0000 : 0x00ff00, 0, 0, 7, 7);
+
+    fillRect((int(intArray[0]*1.0) == 0) ? 0xff0000 : 0x00ff00, 0, 8, 7, 7);
+   
+    fillRect((floatArray[0]*1 == 0.0) ? 0xff0000 : 0x00ff00, 8, 0, 7, 7);
+
+    fillRect((floatArray[0]*1.0 == 0.0) ? 0xff0000 : 0x00ff00, 8, 8, 7, 7);
+}
