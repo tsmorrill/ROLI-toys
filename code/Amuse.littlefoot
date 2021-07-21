@@ -56,7 +56,7 @@ void setArrays()
     {
         register[i] = (getRandomInt(2) == 1);
     }
-    
+
     for (int i = 0; i < 15; ++i)
     {
         cellX[i] = i;
@@ -76,12 +76,12 @@ void setArrays()
     {
         msInterval[i] = 0 + 45*(14-i);
     }
-    
+
     for (int i = 0; i < 5; ++i)
     {
         tap[i] = 31-3*i;
     }
-    
+
     note[0] = note0;
     note[1] = note1;
     note[2] = note2;
@@ -135,17 +135,17 @@ void drawRegister()
             fillPixel(0x808080, cellX[i], cellY[i]);
         }
     }
-    
+
     fillPixel(0x800000, cellX[tap[0]], cellY[tap[0]]);
     fillPixel(0x000080, cellX[tap[1]], cellY[tap[1]]);
     fillPixel(0x008000, cellX[tap[2]], cellY[tap[2]]);
-    fillPixel(0x808000, cellX[tap[3]], cellY[tap[4]]);
+    fillPixel(0x808000, cellX[tap[3]], cellY[tap[3]]);
 
     for (int i = 0; i<4; ++i)
     {
         if (register[tap[i]])
         {
-            blendPixel(0x30ffffff, cellX[tap[i]], cellY[tap[i]]); 
+            blendPixel(0x30ffffff, cellX[tap[i]], cellY[tap[i]]);
         }
     }
 }
@@ -162,7 +162,7 @@ void drawButtons()
     fillRect(0x000080, 4,  11, 3, 3);
     fillRect(0x008000, 8,  11, 3, 3);
     fillRect(0x808000, 12, 11, 3, 3);
-    
+
     blendRect(0x30ffffff, 4*litButton, 11, 3, 3,);
 }
 
@@ -205,8 +205,8 @@ void handleButtonDown (int index)
 }
 
 int convertPositionToPixel (float pos)              // copied from pselodux
-{ 
-    return int ((map(pos, 0.0, 1.9, 0.15, 4.7)) * 3); 
+{
+    return int ((map(pos, 0.0, 1.9, 0.15, 4.7)) * 3);
 }
 
 void touchStart (int index, float x, float y, float z, float vz)
@@ -215,11 +215,9 @@ void touchStart (int index, float x, float y, float z, float vz)
     {
         int xPixel = convertPositionToPixel(x);
         int yPixel = convertPositionToPixel(y);
-    
+
         if (1 <= yPixel && yPixel <= 3)
         {
-            log(xPixel);
-            log(yPixel);
             if (yPixel == 1)
             {
                 tap[litButton] = xPixel;
