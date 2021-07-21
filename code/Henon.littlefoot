@@ -39,8 +39,8 @@ int colour;
 void initParams()
 {
     colour = makeARGB(255, getRandomInt(128) + 127, getRandomInt(128) + 127, getRandomInt(128) + 127);
-    xCoord = 4*getRandomFloat() - 1;
-    yCoord = 4*getRandomFloat() - 1;    
+    xCoord = 4*(getRandomFloat() - 1);
+    yCoord =   (getRandomFloat() - 1);    
 }
 
 void initialise()

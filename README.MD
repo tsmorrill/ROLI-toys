@@ -11,11 +11,9 @@ A 32-bit shift array with selectable tap locations, based on the Triadex Muse.
 Outputs MIDI note over USB.
 Note seclection available through the ROLI Dashboard.
 
-### Physical Button:
+### Controls:
 
-Toggles playback on and off. MIDI panic.
-
-### Touch Controls:
+Physical Button - Play/Pause. MIDI panic.
 
 Track - Place selected tap.
 
@@ -27,18 +25,32 @@ Green and Yellow are output taps.
 
 Touch with three fingers and release: Initialize controls and randomize memory.
 
+## Henon
+A MIDI CC generator using the Henon map.
+Spawns a new particle if the current particle escapes the viewing window.
+Outputs MIDI CC over USB.
+Options available through the ROLI Dashboard.
+
+Note - viewing window is calibrated for default parameters only.
+
+### Controls:
+
+Physical Button - Play/Pause. MIDI panic.
+
+Physical Button - Play/Pause. MIDI panic.
+
+X-axis - Speed.
+
 ## Shift Register
 A 16-bit shift array with memory corruption, based on the Turing Machine eurorack module by Tom Whitwell.
 Outputs MIDI note with velocity over USB.
 Fixed velocity option available through the ROLI Dashboard.
 
-### Physical Button:
+### Controls:
 
-Toggles playback on and off. MIDI panic.
+Physical Button - Play/Pause. MIDI panic.
 
-### Touch Controls:
-
-X-axis - Speed
+X-axis - Speed.
 
 Y-axis - Probability that a shifted bit will be inverted.
 
@@ -50,11 +62,9 @@ Up to eight balls roll on a tilted plate, triggering MIDI notes when they strike
 Gradient indicates the direction of the tilt.
 Outputs MIDI note over USB. Options available through the ROLI Dashboard.
 
-### Physical Button:
+### Controls:
 
-Delete all balls. MIDI panic.
-
-### Touch Controls:
+Physical Button - Delete all balls. MIDI panic.
 
 Tap - Spawn a new ball
 
