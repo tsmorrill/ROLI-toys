@@ -1,0 +1,122 @@
+/*
+<metadata description="Random CC"
+    details="Uses the Henon chaotic attractor"
+    target="Lightpad"
+    tags="MIDI;Generator;">
+    <groups>
+            <group name="CC"    displayName="CC" />
+            <group name="param" displayName="Chaos Parameters" />
+    </groups>
+    <variables>
+        <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" />
+
+    
+        <variable group="CC" name="xCC" displayName="X CC" type="int" min="0" max="127" value="1" />
+        <variable group="CC" name="yCC" displayName="Y CC" type="int" min="0" max="127" value="7" />
+        
+        <variable group="param" name="a" displayName="A" type="float" min="1.0" max="1.5" value="1.4" />
+        <variable group="param" name="b" displayName="B" type="float" min="0.0" max="1.0" value="0.3" />
+        </variables>
+</metadata>
+*/
+
+//==============================================================================
+
+// Lookup Table
+int msInterval[15];
+
+// Dynamical System
+float xCoord, yCoord;
+
+// Play Control
+bool playing;
+int  sliderX, sliderY, loggedTime;
+
+int colour;
+
+//==============================================================================
+
+void initParams()
+{
+    colour = makeARGB(255, getRandomInt(128) + 127, getRandomInt(128) + 127, getRandomInt(128) + 127);
+    xCoord = 4*getRandomFloat() - 1;
+    yCoord = 4*getRandomFloat() - 1;    
+}
+
+void initialise()
+{
+    clearDisplay();
+    sliderX = 7;
+    initParams();
+    
+    for (int i = 0; i < 15; ++i)
+    {
+        msInterval[i] = 0 + 45*(14 - i);
+    }
+}
+
+//==============================================================================
+
+bool waitedLongEnough()
+{
+    int t = getMillisecondCounter();
+    if (t - loggedTime >= msInterval[sliderX])
+    {
+        loggedTime = t;
+        return true
+    }
+    return false
+}
+
+void repaint()
+{
+    if (playing)
+    {
+        if (waitedLongEnough())
+        {
+            blendRect(0x10000000, 0, 0, 15, 15);
+            float buffer = xCoord;
+            xCoord = 1 - a*xCoord*xCoord + yCoord;
+            yCoord = b*buffer;
+
+            if (!((-2 <= xCoord && xCoord<= 2) && (-0.5 <= yCoord && yCoord <= 0.5)))
+            {
+                initParams();
+            }
+            
+            float tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
+            float tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
+                        
+            blendCircle(colour, tempX, tempY, 0.0, true);
+            
+            tempX = map(xCoord, -2.0, 2.0, 0.0, 128.0);
+            tempY = map(yCoord, -0.5, 0.5, 0.0, 128.0);
+            
+            sendCC(channel - 1, xCC, int (tempX));
+            sendCC(channel - 1, yCC, int (tempY));
+        }
+    }
+}
+
+//==============================================================================
+
+void handleButtonDown (int index)
+{
+    playing = ! playing;
+}
+
+void touchStart (int index, float x, float y, float z, float vz)
+{
+    if (index == 1)
+    {
+        sliderX = int ((map(x, 0.0, 1.9, 0.15, 4.7)) * 3);
+    }
+}
+
+void touchMove (int index, float x, float y, float z, float vz)
+{
+    if (index == 1)
+    {
+        sliderX = int ((map(x, 0.0, 1.9, 0.15, 4.7)) * 3);
+    }
+}
