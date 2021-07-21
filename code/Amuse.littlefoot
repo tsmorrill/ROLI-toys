@@ -1,0 +1,273 @@
+/*
+<metadata description="Algorithmic Sequencer"
+    details="32 bit shift register based on the Triadex Muse."
+    target="Lightpad"
+    tags="MIDI;Generator;">
+    <groups>
+        <group name="note"    displayName="Notes" />
+    </groups>
+    <variables>
+        <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" />
+
+        <variable group="note" name="note0" displayName="Note 1" type="midiNote" value="A2" />
+        <variable group="note" name="note1" displayName="Note 2" type="midiNote" value="B2" />
+        <variable group="note" name="note2" displayName="Note 3" type="midiNote" value="C3" />
+        <variable group="note" name="note3" displayName="Note 4" type="midiNote" value="D3" />
+        <variable group="note" name="note4" displayName="Note 5" type="midiNote" value="E3" />
+        <variable group="note" name="note5" displayName="Note 6" type="midiNote" value="F3" />
+        <variable group="note" name="note6" displayName="Note 7" type="midiNote" value="G3" />
+        <variable group="note" name="note7" displayName="Note 8" type="midiNote" value="A4" />
+    </variables>
+</metadata>
+*/
+
+//==============================================================================
+
+// Lookup Tables
+int  cellX[32], cellY[32], msInterval[15], note[8];
+
+// Shift Register
+bool register[32];
+
+// Play Control
+bool playing;
+int  tap[5], loggedTime;
+
+// UI
+bool sliderActive;
+int  sliderX, litButton;
+
+// MIDI
+int  oldNote;
+
+//==============================================================================
+
+void sendAllNotesOff()
+{
+    for (int i = 0; i<128; ++i)
+    {
+        sendNoteOff(channel - 1, i, 0);
+    }
+}
+
+void setArrays()
+{
+    for (int i = 0; i < 32; ++i)
+    {
+        register[i] = (getRandomInt(2) == 1);
+    }
+    
+    for (int i = 0; i < 15; ++i)
+    {
+        cellX[i] = i;
+        cellY[i] = 1;
+    }
+    cellX[15] = 14;
+    cellY[15] = 2;
+    for (int i = 16; i < 31; ++i)
+    {
+        cellX[i] = 30 - i;
+        cellY[i] = 3;
+    }
+    cellX[31] = 0;
+    cellY[31] = 2;
+
+    for (int i = 0; i < 15; ++i)
+    {
+        msInterval[i] = 0 + 45*(14-i);
+    }
+    
+    for (int i = 0; i < 5; ++i)
+    {
+        tap[i] = 31-3*i;
+    }
+    
+    note[0] = note0;
+    note[1] = note1;
+    note[2] = note2;
+    note[3] = note3;
+    note[4] = note4;
+    note[5] = note5;
+    note[6] = note6;
+    note[7] = note7;
+}
+
+void initialise()
+{
+    sendAllNotesOff();
+    setArrays();
+    sliderX = 7;
+}
+
+//==============================================================================
+
+bool waitedLongEnough()
+{
+    int t = getMillisecondCounter();
+    if (t - loggedTime >= msInterval[sliderX])
+    {
+        loggedTime = t;
+        return true
+    }
+    return false
+}
+
+void updateRegister()
+{
+    bool buffer = !(register[tap[0]] && register[tap[1]]);
+    for (int i = 0; i < 31; ++i)
+    {
+        register[i] = register[i+1];
+    }
+    register[31] = buffer;
+}
+
+
+void drawRegister()
+{
+    fillRect(0x080808, 0, 0, 15, 1);
+    fillRect(0x080808, 1, 2, 13, 1);
+    fillRect(0x080808, 0, 4, 15, 1);
+    for (int i = 0; i < 32; ++i)
+    {
+        if (register[i])
+        {
+            fillPixel(0x808080, cellX[i], cellY[i]);
+        }
+    }
+    
+    fillPixel(0x800000, cellX[tap[0]], cellY[tap[0]]);
+    fillPixel(0x000080, cellX[tap[1]], cellY[tap[1]]);
+    fillPixel(0x008000, cellX[tap[2]], cellY[tap[2]]);
+    fillPixel(0x808000, cellX[tap[3]], cellY[tap[4]]);
+
+    for (int i = 0; i<4; ++i)
+    {
+        if (register[tap[i]])
+        {
+            blendPixel(0x30ffffff, cellX[tap[i]], cellY[tap[i]]); 
+        }
+    }
+}
+
+void drawSlider()
+{
+    fillRect(0x080808, 0, 7, 15, 1);
+    fillRect(0x808080, sliderX, 6, 1, 3);
+}
+
+void drawButtons()
+{
+    fillRect(0x800000, 0,  11, 3, 3);
+    fillRect(0x000080, 4,  11, 3, 3);
+    fillRect(0x008000, 8,  11, 3, 3);
+    fillRect(0x808000, 12, 11, 3, 3);
+    
+    blendRect(0x30ffffff, 4*litButton, 11, 3, 3,);
+}
+
+void processMIDI()
+{
+    int index = (register[tap[4]] ? 4 : 0) + (register[tap[3]] ? 2 : 0) + (register[tap[2]] ? 1 : 0);
+    if (note[index] != oldNote)
+    {
+        sendNoteOff(channel - 1, oldNote,     0  );
+        sendNoteOn (channel - 1, note[index], 127);
+    }
+    oldNote = note[index];
+}
+
+void repaint()
+{
+    if (playing)
+    {
+        if (waitedLongEnough())
+        {
+            updateRegister();
+            processMIDI();
+        }
+    }
+    clearDisplay();
+    drawRegister();
+    drawSlider();
+    drawButtons();
+}
+
+//==============================================================================
+
+void handleButtonDown (int index)
+{
+    playing = ! playing;
+    if (! playing)
+    {
+        sendAllNotesOff();
+    }
+}
+
+int convertPositionToPixel (float pos)              // copied from pselodux
+{ 
+    return int ((map(pos, 0.0, 1.9, 0.15, 4.7)) * 3); 
+}
+
+void touchStart (int index, float x, float y, float z, float vz)
+{
+    if (index == 1)
+    {
+        int xPixel = convertPositionToPixel(x);
+        int yPixel = convertPositionToPixel(y);
+    
+        if (1 <= yPixel && yPixel <= 3)
+        {
+            log(xPixel);
+            log(yPixel);
+            if (yPixel == 1)
+            {
+                tap[litButton] = xPixel;
+            }
+            else if (yPixel == 2)
+            {
+                if (xPixel == 0)
+                {
+                    tap[litButton] = 31;
+                }
+                else if (xPixel == 14)
+                {
+                    tap[litButton] = 15;
+                }
+            }
+            else if (yPixel == 3)
+            {
+                tap[litButton] = 30 - xPixel;
+            }
+        }
+        else if (6 <= yPixel && yPixel <= 9)
+        {
+            sliderX = xPixel;
+            sliderActive = true;
+        }
+        else if (11 <= yPixel && yPixel <= 13 && xPixel % 4 != 3)
+        {
+            litButton = xPixel/4;
+        }
+    }
+}
+
+void touchMove (int index, float x, float y, float z, float vz)
+{
+    if (index == 1 && sliderActive)
+    {
+        sliderX = convertPositionToPixel(x);
+    }
+}
+
+void touchEnd (int index, float x, float y, float z, float vz)
+{
+    if (index == 1)
+    {
+        sliderActive = false;
+    }
+    if (index == 3)
+    {
+        initialise();
+    }
+}

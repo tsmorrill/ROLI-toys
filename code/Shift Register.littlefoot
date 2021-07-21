@@ -9,6 +9,8 @@
 </metadata>
 */
 
+//==============================================================================
+
 int countdown;
 int countdownMax;
 int step;
@@ -26,6 +28,8 @@ float probability;
 bool playing;
 
 int randHeight;
+
+//==============================================================================
 
 void initialise()
 {
@@ -45,7 +49,7 @@ void initialise()
 
 void sendAllNotesOff()
 {
-    for (int i = 0; i<128; i++)
+    for (int i = 0; i<128; ++i)
     {
         sendNoteOff(0, i, 0);
     }
@@ -72,7 +76,7 @@ void tick()
 
 void bits(int argb, int value, int offset)
 {
-        for (int i = 0; i < 7; i ++)
+        for (int i = 0; i < 8; ++ i)
         {
             if ((value & 1<<i) > 0)
             {
