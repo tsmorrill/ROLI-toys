@@ -114,7 +114,7 @@ bool waitedLongEnough()
 
 void updateRegister()
 {
-    bool buffer = !(register[tap[0]] && register[tap[1]]);
+    bool buffer = (register[tap[0]] != register[tap[1]]);
     for (int i = 0; i < 31; ++i)
     {
         register[i] = register[i+1];
