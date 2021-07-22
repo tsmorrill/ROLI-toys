@@ -16,7 +16,7 @@
         <variable group="note" name="note4" displayName="Note 5" type="midiNote" value="E3" />
         <variable group="note" name="note5" displayName="Note 6" type="midiNote" value="F3" />
         <variable group="note" name="note6" displayName="Note 7" type="midiNote" value="G3" />
-        <variable group="note" name="note7" displayName="Note 8" type="midiNote" value="A4" />
+        <variable group="note" name="note7" displayName="Note 8" type="midiNote" value="A3" />
     </variables>
 </metadata>
 */
