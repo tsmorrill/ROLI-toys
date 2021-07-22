@@ -4,13 +4,18 @@
     target="Lightpad"
     tags="MIDI;Generator;">
     <groups>
-            <group name="CC"    displayName="CC" />
-            <group name="param" displayName="Chaos Parameters" />
+        <group name="CC"    displayName="CC"/>
+        <group name="advanced"    displayName="Advanced Features"/>
+        <group name="param" displayName="Chaos Parameters" />
     </groups>
     <variables>
         <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" />
-
-    
+        
+        <variable group="advanced" name="XIsPitchBend" displayName="Override X CC With Pitchbend"  type="bool" value="false" />
+        <variable group="advanced" name="YIsPressure"  displayName="Override Y CC With Aftertouch" type="bool" value="false" />
+        <variable group="advanced" name="TriggerNote"  displayName="Send Note Triggers" type="bool" value="false" />
+        <variable group="advanced" name="note"         displayName="Note" type="midiNote" value="C3" />
+        
         <variable group="CC" name="xCC" displayName="X CC" type="int" min="0" max="127" value="1" />
         <variable group="CC" name="yCC" displayName="Y CC" type="int" min="0" max="127" value="7" />
         
@@ -38,7 +43,7 @@ int colour;
 
 void initParams()
 {
-    colour = makeARGB(255, getRandomInt(128) + 127, getRandomInt(128) + 127, getRandomInt(128) + 127);
+    colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
     xCoord = 4*(getRandomFloat() - 1);
     yCoord =   (getRandomFloat() - 1);    
 }
@@ -75,25 +80,51 @@ void repaint()
         if (waitedLongEnough())
         {
             blendRect(0x10000000, 0, 0, 15, 15);
+
             float buffer = xCoord;
+            
             xCoord = 1 - a*xCoord*xCoord + yCoord;
             yCoord = b*buffer;
 
-            if (!((-2 <= xCoord && xCoord<= 2) && (-0.5 <= yCoord && yCoord <= 0.5)))
+            if (!(-2 <= xCoord && xCoord<= 2 && -0.5 <= yCoord && yCoord <= 0.5))
             {
                 initParams();
             }
             
-            float tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
-            float tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
-                        
-            blendCircle(colour, tempX, tempY, 0.0, true);
-            
-            tempX = map(xCoord, -2.0, 2.0, 0.0, 128.0);
+            tempX = map(xCoord, -2.0, 2.0, 0.0, XIsPitchBend ? 16384.0 : 128.0);
             tempY = map(yCoord, -0.5, 0.5, 0.0, 128.0);
             
-            sendCC(channel - 1, xCC, int (tempX));
-            sendCC(channel - 1, yCC, int (tempY));
+            if (XIsPitchBend)
+            {
+                sendPitchBend(channel - 1, int (tempX));
+            }
+            else
+            {
+                sendCC(channel - 1, xCC, int (tempX));
+            }
+            if (YIsPressure)
+            {
+                sendChannelPressure(channel - 1, int (tempY));
+            }
+            else
+            {
+                sendCC(channel - 1, yCC, int (tempY));                
+            }
+            if (TriggerNote)
+            {
+                sendNoteOn(channel-1, note, int (tempY));
+            }
+
+
+            float tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
+            float tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
+            
+            blendCircle(colour, tempX, 14 - tempY, 0.0, true);          // correct for orientation
+            
+            if (TriggerNote)
+            {
+                sendNoteOff(channel - 1, note, 0);
+            }
         }
     }
 }
@@ -103,6 +134,14 @@ void repaint()
 void handleButtonDown (int index)
 {
     playing = ! playing;
+    if (! playing && XIsPitchBend)
+    {
+        sendPitchBend(channel -1 , 8192);
+        if (TriggerNote)
+        {
+            sendNoteOff(channel - 1, note, 0);
+        }
+    }
 }
 
 void touchStart (int index, float x, float y, float z, float vz)
