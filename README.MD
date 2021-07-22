@@ -35,9 +35,7 @@ Note - viewing window is calibrated for default parameters only.
 
 ### Controls:
 
-Physical Button - Play/Pause. MIDI panic.
-
-Physical Button - Play/Pause. MIDI panic.
+Physical Button - Play/Pause.
 
 X-axis - Speed.
 
