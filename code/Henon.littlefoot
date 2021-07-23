@@ -10,15 +10,15 @@
     </groups>
     <variables>
         <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" />
-        
+
         <variable group="advanced" name="XIsPitchBend" displayName="Override X CC With Pitchbend"  type="bool" value="false" />
         <variable group="advanced" name="YIsPressure"  displayName="Override Y CC With Aftertouch" type="bool" value="false" />
         <variable group="advanced" name="TriggerNote"  displayName="Send Note Triggers" type="bool" value="false" />
         <variable group="advanced" name="note"         displayName="Note" type="midiNote" value="C3" />
-        
+
         <variable group="CC" name="xCC" displayName="X CC" type="int" min="0" max="127" value="1" />
         <variable group="CC" name="yCC" displayName="Y CC" type="int" min="0" max="127" value="7" />
-        
+
         <variable group="param" name="a" displayName="A" type="float" min="1.0" max="1.5" value="1.4" />
         <variable group="param" name="b" displayName="B" type="float" min="0.0" max="1.0" value="0.3" />
         </variables>
@@ -45,7 +45,7 @@ void initParams()
 {
     colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
     xCoord = 4*(getRandomFloat() - 1);
-    yCoord =   (getRandomFloat() - 1);    
+    yCoord =   (getRandomFloat() - 1);
 }
 
 void initialise()
@@ -53,7 +53,7 @@ void initialise()
     clearDisplay();
     sliderX = 7;
     initParams();
-    
+
     for (int i = 0; i < 15; ++i)
     {
         msInterval[i] = 0 + 45*(14 - i);
@@ -82,7 +82,7 @@ void repaint()
             blendRect(0x10000000, 0, 0, 15, 15);
 
             float buffer = xCoord;
-            
+
             xCoord = 1 - a*xCoord*xCoord + yCoord;
             yCoord = b*buffer;
 
@@ -90,10 +90,10 @@ void repaint()
             {
                 initParams();
             }
-            
-            tempX = map(xCoord, -2.0, 2.0, 0.0, XIsPitchBend ? 16384.0 : 128.0);
-            tempY = map(yCoord, -0.5, 0.5, 0.0, 128.0);
-            
+
+            float tempX = map(xCoord, -2.0, 2.0, 0.0, XIsPitchBend ? 16384.0 : 128.0);
+            float tempY = map(yCoord, -0.5, 0.5, 0.0, 128.0);
+
             if (XIsPitchBend)
             {
                 sendPitchBend(channel - 1, int (tempX));
@@ -108,7 +108,7 @@ void repaint()
             }
             else
             {
-                sendCC(channel - 1, yCC, int (tempY));                
+                sendCC(channel - 1, yCC, int (tempY));
             }
             if (TriggerNote)
             {
@@ -116,11 +116,11 @@ void repaint()
             }
 
 
-            float tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
-            float tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
-            
+            tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
+            tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
+
             blendCircle(colour, tempX, 14 - tempY, 0.0, true);          // correct for orientation
-            
+
             if (TriggerNote)
             {
                 sendNoteOff(channel - 1, note, 0);
