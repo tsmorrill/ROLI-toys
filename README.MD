@@ -25,6 +25,19 @@ Green and Yellow are output taps.
 
 Touch with three fingers and release: Randomize memory.
 
+## Gauss
+A MIDI CC generator using the Gauss continued fraction map.
+Outputs MIDI CC over USB.
+Options available through the ROLI Dashboard.
+
+### Controls:
+
+Physical Button - Play/Pause.
+
+X-axis while playing - Speed.
+
+Touch while stopped - Spawn new particle.
+
 ## Henon
 A MIDI CC generator using the Henon map.
 Spawns a new particle if the current particle escapes the viewing window.
@@ -37,7 +50,9 @@ Note - viewing window is calibrated for default parameters only.
 
 Physical Button - Play/Pause.
 
-X-axis - Speed.
+X-axis while playing - Speed.
+
+Touch while stopped - Spawn new particle.
 
 ## Shift Register
 A 16-bit shift array with memory corruption, based on the Turing Machine eurorack module by Tom Whitwell.

@@ -1,6 +1,6 @@
 /*
 <metadata description="Random CC"
-    details="Uses the Henon chaotic attractor"
+    details="Uses the Gauss continued fraction map."
     target="Lightpad"
     tags="MIDI;Generator;">
     <groups>
@@ -43,14 +43,14 @@ int colour;
 
 void initParams()
 {
-    clearDisplay();
     colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
-    xCoord = 4*(getRandomFloat() - 0.5);
-    yCoord =   (getRandomFloat() - 0.5);
+    xCoord = getRandomFloat();
+    yCoord = getRandomFloat();
 }
 
 void initialise()
 {
+    clearDisplay();
     sliderX = 7;
     initParams();
 
@@ -81,18 +81,16 @@ void repaint()
         {
             blendRect(0x10000000, 0, 0, 15, 15);
 
-            float buffer = xCoord;
-
-            xCoord = 1 - a*xCoord*xCoord + yCoord;
-            yCoord = b*buffer;
-
-            if (!(-2 <= xCoord && xCoord<= 2 && -0.5 <= yCoord && yCoord <= 0.5))
+            xCoord = 1/xCoord;
+            while (xCoord > 1)
             {
-                initParams();
+                -- xCoord;
+                ++ yCoord;
             }
-
-            float tempX = map(xCoord, -2.0, 2.0, 0.0, XIsPitchBend ? 16384.0 : 128.0);
-            float tempY = map(yCoord, -0.5, 0.5, 0.0, 128.0);
+            yCoord = 1/yCoord;
+                        
+            float tempX = xCoord*(XIsPitchBend ? 16384 : 128);
+            float tempY = yCoord*128;
 
             if (XIsPitchBend && playing)
             {
@@ -117,11 +115,8 @@ void repaint()
                 sendNoteOn(channel-1, note, int (tempY));
             }
 
-            tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
-            tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
-
-            blendCircle(colour, tempX, 14 - tempY, 0.0, true);          // correct for orientation
-
+            blendCircle(colour, 14*xCoord, 14 - 14*yCoord, 0.0, true);          // correct for orientation
+            
             if (TriggerNote)
             {
                 sendNoteOff(channel - 1, note, 0);
@@ -160,10 +155,9 @@ void touchStart (int index, float x, float y, float z, float vz)
         {
             clearDisplay();
             colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
-            xCoord = 2*x - 2;
-            yCoord = y/2 - 0.5;
-            
-            blendCircle(colour, map(xCoord, -2.0, 2.0, 0.0, 14.0), map(yCoord, -0.5, 0.5, 0.0, 14.0), 0.0, true);
+            xCoord = x/2;
+            yCoord = 1 - y/2;
+            blendCircle(colour, 14*xCoord, 14 - 14*yCoord, 0.0, true);
         }
     }
 }
