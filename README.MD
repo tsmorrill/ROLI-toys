@@ -23,7 +23,7 @@ Touch Pads - Select tap.
 Red and Blue are feedback taps.
 Green and Yellow are output taps.
 
-Touch with three fingers and release: Initialize controls and randomize memory.
+Touch with three fingers and release: Randomize memory.
 
 ## Henon
 A MIDI CC generator using the Henon map.
