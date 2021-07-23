@@ -102,6 +102,7 @@ void repaint()
             {
                 sendCC(channel - 1, xCC, int (tempX));
             }
+
             if (YIsPressure)
             {
                 sendChannelPressure(channel - 1, int (tempY));
@@ -110,11 +111,11 @@ void repaint()
             {
                 sendCC(channel - 1, yCC, int (tempY));
             }
+
             if (TriggerNote)
             {
                 sendNoteOn(channel-1, note, int (tempY));
             }
-
 
             tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
             tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
