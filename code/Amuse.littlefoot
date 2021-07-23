@@ -24,7 +24,7 @@
 //==============================================================================
 
 // Lookup Tables
-int  cellX[32], cellY[32], msInterval[15], note[8];
+int  cellX[32], cellY[32], msInterval[15], note[8], colour[4];
 
 // Shift Register
 bool register[32];
@@ -50,12 +50,17 @@ void sendAllNotesOff()
     }
 }
 
-void setArrays()
+void scrambleMemory()
 {
     for (int i = 0; i < 32; ++i)
     {
         register[i] = (getRandomInt(2) == 1);
     }
+}
+
+void setArrays()
+{
+    scrambleMemory();
 
     for (int i = 0; i < 15; ++i)
     {
@@ -79,9 +84,14 @@ void setArrays()
 
     for (int i = 0; i < 5; ++i)
     {
-        tap[i] = 31-3*i;
+        tap[i] = i;
     }
 
+    colour[0] = 0x800000;
+    colour[1] = 0x000080;
+    colour[2] = 0x008000;
+    colour[3] = 0x808000;
+    
     note[0] = note0;
     note[1] = note1;
     note[2] = note2;
@@ -125,21 +135,21 @@ void updateRegister()
 
 void drawRegister()
 {
-    fillRect(0x080808, 0, 0, 15, 1);
-    fillRect(0x080808, 1, 2, 13, 1);
-    fillRect(0x080808, 0, 4, 15, 1);
     for (int i = 0; i < 32; ++i)
     {
-        if (register[i])
-        {
-            fillPixel(0x808080, cellX[i], cellY[i]);
-        }
+        fillPixel(register[i] ? 0x808080 : 0x080808, cellX[i], cellY[i]);
     }
 
-    fillPixel(0x800000, cellX[tap[0]], cellY[tap[0]]);
-    fillPixel(0x000080, cellX[tap[1]], cellY[tap[1]]);
-    fillPixel(0x008000, cellX[tap[2]], cellY[tap[2]]);
-    fillPixel(0x808000, cellX[tap[3]], cellY[tap[3]]);
+    for (int i = 0; i < 4; ++i)
+    {
+        if (i == litButton)
+        {
+            continue;
+        }
+        fillPixel(colour[i], cellX[tap[i]], cellY[tap[i]]);
+    }
+    
+    fillPixel(colour[litButton], cellX[tap[litButton]], cellY[tap[litButton]]);
 
     for (int i = 0; i<4; ++i)
     {
@@ -216,9 +226,9 @@ void touchStart (int index, float x, float y, float z, float vz)
         int xPixel = convertPositionToPixel(x);
         int yPixel = convertPositionToPixel(y);
 
-        if (1 <= yPixel && yPixel <= 3)
+        if (0 <= yPixel && yPixel <= 4)
         {
-            if (yPixel == 1)
+            if (yPixel == 0 || yPixel == 1)
             {
                 tap[litButton] = xPixel;
             }
@@ -233,7 +243,7 @@ void touchStart (int index, float x, float y, float z, float vz)
                     tap[litButton] = 15;
                 }
             }
-            else if (yPixel == 3)
+            else if (yPixel == 3 || yPixel == 4)
             {
                 tap[litButton] = 30 - xPixel;
             }
@@ -266,6 +276,6 @@ void touchEnd (int index, float x, float y, float z, float vz)
     }
     if (index == 3)
     {
-        initialise();
+        scrambleMemory();
     }
 }
