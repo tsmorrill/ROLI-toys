@@ -6,7 +6,7 @@
     <groups>
         <group name="CC"    displayName="CC"/>
         <group name="advanced"    displayName="Advanced Features"/>
-        <group name="param" displayName="Chaos Parameters" />
+        <group name="param" displayName="Henon Parameters" />
     </groups>
     <variables>
         <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" />
