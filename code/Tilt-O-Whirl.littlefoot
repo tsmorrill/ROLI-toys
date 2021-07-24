@@ -52,7 +52,7 @@ int frameCounter;
 
 void sendAllNotesOff()
 {
-    for (int i = 0; i<127; ++i)
+    for (int i = 0; i<128; ++i)
     {
         sendNoteOff(0, i, 0);
     }
@@ -143,7 +143,7 @@ void rotate()
 void applyFriction(int num)
 {
     int temp = velX[num];                // circumvent int array * float = 0 bug
-    
+
     velX[num] = int (temp*(1 - friction));
     temp = velY[num];
     velY[num] = int (temp*(1 - friction));
@@ -154,7 +154,7 @@ void updateBall(int num)
 {
     velX[num] += accX;
     velY[num] += accY;
-    
+
     if (friction != 0.0)
     {
         applyFriction(num);
@@ -167,7 +167,7 @@ void updateBall(int num)
     {
         ballX[num] = (ballX[num] < 0) ? (-ballX[num]) % (14<<16) : 14<<16 - (ballX[num] % 14<<16);
         velX[num] *= -1;
-                
+
         if (abs(velX[num]) > 1<<13)
         {
             ballBounce[num] = true;
@@ -177,7 +177,7 @@ void updateBall(int num)
     {
         ballY[num] = (ballY[num] < 0) ? (-ballY[num]) % (14<<16) : 14<<16 - (ballY[num] % 14<<16);
         velY[num] *= -1;
-                
+
         if (abs(velY[num]) > 1<<13)
         {
             ballBounce[num] = true;
