@@ -1,0 +1,206 @@
+/*
+<metadata description="Euclidean Rhythm Generator"
+    details=""
+    target="Lightpad"
+    tags="MIDI;Generator;">
+    <groups>
+        <group name="note"    displayName="Notes" />
+        <group name="colour"    displayName="Colors" />
+    </groups>
+    <variables>
+        <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" />
+
+        <variable group="note" name="note0" displayName="Note 1" type="midiNote" value="A2" />
+        <variable group="note" name="note1" displayName="Note 2" type="midiNote" value="C3" />
+        <variable group="note" name="note2" displayName="Note 3" type="midiNote" value="E3" />
+        <variable group="note" name="note3" displayName="Note 4" type="midiNote" value="G3" />
+
+        <variable group="colour" name="colour0" displayName="Color 1" type="colour" value="0x800000" />
+        <variable group="colour" name="colour1" displayName="Color 2" type="colour" value="0x000080" />
+        <variable group="colour" name="colour2" displayName="Color 3" type="colour" value="0x008000" />
+        <variable group="colour" name="colour3" displayName="Color 4" type="colour" value="0x808000" />
+    </variables>
+</metadata>
+*/
+
+//==============================================================================
+
+// Lookup Tables
+int colour[4], note[4], msInterval[15];
+
+// Tracks
+bool track[4][32];
+int length[4], pulses[4], position[4];
+
+// UI
+bool sliderActive;
+int  activeTrack, sliderX;
+
+int frameCounter;
+
+//==============================================================================
+
+void sendAllNotesOff()
+{
+    for (int i = 0; i<127; ++i)
+    {
+        sendNoteOff(0, i, 0);
+    }
+}
+
+void initialise()
+{
+    clearDisplay();
+    sendAllNotesOff();
+
+    for (int i = 0; i < 15; ++i)
+    {
+        msInterval[i] = 45*(14-i);
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        length[i] = 1;
+    }
+
+    note[0] = note0;
+    note[1] = note1;
+    note[2] = note2;
+    note[3] = note3;
+
+    colour[0] = colour0;
+    colour[1] = colour1;
+    colour[2] = colour2;
+    colour[3] = colour3;
+}
+
+//==============================================================================
+
+bool waitedLongEnough()
+{
+    int t = getMillisecondCounter();
+    if (t - loggedTime >= msInterval[sliderX])
+    {
+        loggedTime = t;
+        return true
+    }
+    return false
+}
+
+void drawDigit(int digit, int colour, int x, int y)
+{
+    if (digit == 1)                                   // one rectangle necessary
+    {
+
+    }
+    else                                              // >1 rectangles necessary
+    {
+                                                         // draw first rectangle
+        if (digit % 7 == 0)                         // two rectangles sufficient
+        {
+                                                        // draw second rectangle
+            if (digit == 0)
+            {
+
+            }
+            else if (digit == 7)
+            {
+
+            }
+        }
+        else                                      // three rectangles sufficient
+        {
+                                                        // draw second rectangle
+            if (digit == 2 || digit == 3)
+            {
+
+            }
+            else if (digit == 5 || digit == 6)
+            {
+
+            }
+            else if (digit == 8 || digit == 9)
+            {
+
+            }
+            else if (digit == 4)
+            {
+
+            }
+                                                         // draw third rectangle
+            if (digit % 2 == 1)
+            {
+
+            }
+            else if (digit > 7)
+            {
+
+            }
+            else if (digit == 2)
+            {
+
+            }
+            else if (digit == 4)
+            {
+
+            }
+        }
+    }
+}
+
+void repaint()
+{
+    clearDisplay
+    if (playing[0] || playing[1] || playing[2] || playing[3])
+    {
+        if (waitedLongEnough())
+        {
+            for (int i; i < 4; ++i)
+            {
+                if (playing[i])
+                {
+
+                }
+            }
+        }
+    }
+
+    drawDigit(pulses[activeTrack]/10, colour[activeTrack], 0,  0);
+    drawDigit(pulses[activeTrack]%10, colour[activeTrack], 0,  4);
+    drawDigit(length[activeTrack]/10, colour[activeTrack], 0,  8);
+    drawDigit(length[activeTrack]%10, colour[activeTrack], 0, 12);
+
+    fillRect(0x080808, 0, 7, 15, 1);                // draw slider
+    fillRect(0x808080, sliderX, 6, 1, 3);
+}
+
+//==============================================================================
+
+void handleButtonDown(int index)
+{
+    activeTrack = (activeTrack + 1) % 4;
+}
+
+//==============================================================================
+
+int convertPositionToPixel (float pos)              // copied from pselodux
+{
+    return int ((map(pos, 0.0, 1.9, 0.15, 4.7)) * 3);
+}
+
+void touchStart (int index, float x, float y, float z, float vz)
+{
+
+}
+
+void touchMove (int index, float x, float y, float z, float vz)
+{
+
+}
+
+void touchEnd (int index, float x, float y, float z, float vz)
+{
+
+}
+
+//==============================================================================
