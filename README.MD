@@ -8,8 +8,8 @@ Script should appear in the ROLI Dashboard.
 
 ## Amuse
 A 32-bit shift array with selectable tap locations, based on the Triadex Muse.
-Outputs MIDI note over USB.
-Note seclection available through the ROLI Dashboard.
+Outputs MIDI notes.
+Options available through the ROLI Dashboard.
 
 ### Controls:
 
@@ -27,21 +27,21 @@ Touch with three fingers and release: Randomize memory.
 
 ## Gauss
 A MIDI CC generator using the Gauss continued fraction map.
-Outputs MIDI CC over USB.
+Outputs MIDI CC, channel pressure, or pitchbend.
 Options available through the ROLI Dashboard.
 
 ### Controls:
 
 Physical Button - Play/Pause.
 
-X-axis while playing - Speed.
+Touch while playing - Speed.
 
 Touch while stopped - Spawn new particle.
 
 ## Henon
 A MIDI CC generator using the Henon map.
 Spawns a new particle if the current particle escapes the viewing window.
-Outputs MIDI CC over USB.
+Outputs MIDI CC, channel pressure, or pitchbend.
 Options available through the ROLI Dashboard.
 
 Note - viewing window is calibrated for default parameters only.
@@ -50,14 +50,14 @@ Note - viewing window is calibrated for default parameters only.
 
 Physical Button - Play/Pause.
 
-X-axis while playing - Speed.
+Touch while playing - Speed.
 
 Touch while stopped - Spawn new particle.
 
 ## Shift Register
 A 16-bit shift array with memory corruption, based on the Turing Machine eurorack module by Tom Whitwell.
-Outputs MIDI note with velocity over USB.
-Fixed velocity option available through the ROLI Dashboard.
+Outputs MIDI note with velocity.
+Options available through the ROLI Dashboard.
 
 ### Controls:
 
@@ -73,7 +73,8 @@ Touch with three fingers and release: Reset
 A 2D physics simulator, based on the Tombola sequencer by Teenage Engineering.
 Up to eight balls roll on a tilted plate, triggering MIDI notes when they strike the edges.
 Gradient indicates the direction of the tilt.
-Outputs MIDI note over USB. Options available through the ROLI Dashboard.
+Outputs MIDI notes.
+Options available through the ROLI Dashboard.
 
 ### Controls:
 
