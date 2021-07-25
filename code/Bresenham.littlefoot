@@ -218,8 +218,10 @@ int convertPositionToPixel (float pos)                   // copied from pselodux
     return int ((map(pos, 0.0, 1.9, 0.15, 4.7)) * 3);
 }
 
-void updateTrack(int trackNumber)                       // Bresenham's algorithm
+void updateTrack(int n)                                 // Bresenham's algorithm
 {
+    int trackNumber = n;    // circumvent track 1 memory corruption glitch below
+
     int remainder = -pulses[trackNumber];
 
     for (int i = 0; i < length[trackNumber]; ++i)
@@ -231,9 +233,10 @@ void updateTrack(int trackNumber)                       // Bresenham's algorithm
         }
         else
         {
-            track[trackNumber][i] = false;
+            track[trackNumber][1] = false;          // this is the glitched line
         }
         remainder -= pulses[trackNumber];
+        log(length[trackNumber]);
     }
 }
 
@@ -243,9 +246,6 @@ void touchStart (int index, float x, float y, float z, float vz)
     {
         int xPixel = convertPositionToPixel(x);
         int yPixel = convertPositionToPixel(y);
-
-        log(xPixel);
-        log(yPixel);
 
         if (yPixel < 3 && xPixel % 4 != 3)                           // digit up
         {
