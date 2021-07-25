@@ -69,7 +69,6 @@ void initialise()
     setAcc();
     setColourArray();
     setNoteArray();
-    }
 }
 
 void setAcc()

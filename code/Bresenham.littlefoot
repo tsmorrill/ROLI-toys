@@ -61,8 +61,10 @@ void initialise()
 
     for (int i = 0; i < 4; ++i)
     {
-        length[i] = 1;
+        length[i] = 16;
     }
+
+    sliderX = 7;
 
     note[0] = note0;
     note[1] = note1;
@@ -119,7 +121,7 @@ void drawDigit(int digit, int colour, int x, int y)
             }
             else if (digit == 5 || digit == 6)
             {
-                fillRect(0x000000, x + 1, y + 1, 2, 1;
+                fillRect(0x000000, x + 1, y + 1, 2, 1);
             }
             else if (digit == 8 || digit == 9)
             {
@@ -135,7 +137,7 @@ void drawDigit(int digit, int colour, int x, int y)
             {
                 fillRect(0x000000, x, y + 3, 2, 1);
             }
-            else if (digit > 7)
+            else if (digit > 5)
             {
                 fillRect(0x000000, x + 1, y + 3, 1, 1);
             }
@@ -155,10 +157,10 @@ void repaint()
 {
     clearDisplay();
 
-    drawDigit(pulses[activeTrack] / 10, colour[activeTrack], 0,  0);
-    drawDigit(pulses[activeTrack] % 10, colour[activeTrack], 0,  4);
-    drawDigit(length[activeTrack] / 10, colour[activeTrack], 0,  8);
-    drawDigit(length[activeTrack] % 10, colour[activeTrack], 0, 12);
+    drawDigit(pulses[activeTrack] / 10, 0x808080,             0, 0);
+    drawDigit(pulses[activeTrack] % 10, 0x808080,             4, 0);
+    drawDigit(length[activeTrack] / 10, colour[activeTrack],  8, 0);
+    drawDigit(length[activeTrack] % 10, colour[activeTrack], 12, 0);
 
     // draw slider
     fillRect(0x080808, 0, 7, 15, 1);
@@ -172,17 +174,10 @@ void repaint()
             fillRect(colour[i],  4*i,     10, 1, 5);
             fillRect(colour[i],  4*i + 1, 11, 1, 3);
             fillRect(colour[i],  4*i + 2, 12, 1, 1);
-            if (track[i][position[i]])
-            {
-                blendRect(0x30ffffff,  4*i,     10, 1, 5);
-                blendRect(0x30ffffff,  4*i + 1, 11, 1, 3);
-                blendRect(0x30ffffff,  4*i + 2, 12, 1, 1);
-            }
         }
         else
         {
-            fillRect(colour[i],  4*i,     11, 1, 3);
-            fillRect(colour[i],  4*i + 2, 11, 1, 3);
+            fillRect(colour[i],  4*i,     11, 3, 3);
         }
     }
 
@@ -198,6 +193,9 @@ void repaint()
                     if (track[i][position[i]])
                     {
                         sendNoteOn (channel - 1, note[i], 127);
+                        blendRect(0x30ffffff,  4*i,     10, 1, 5);
+                        blendRect(0x30ffffff,  4*i + 1, 11, 1, 3);
+                        blendRect(0x30ffffff,  4*i + 2, 12, 1, 1);
                         sendNoteOff(channel - 1, note[i],   0);
                     }
                 }
@@ -220,20 +218,20 @@ int convertPositionToPixel (float pos)                   // copied from pselodux
     return int ((map(pos, 0.0, 1.9, 0.15, 4.7)) * 3);
 }
 
-void updateTrack(int trackNumber);                      // Bresenham's algorithm
+void updateTrack(int trackNumber)                       // Bresenham's algorithm
 {
-    int remainder  = -pulses[trackNumber];
+    int remainder = -pulses[trackNumber];
 
-    for (int i = 0; i < length[trackNumber], ++i)
+    for (int i = 0; i < length[trackNumber]; ++i)
     {
         if (remainder < 0)
         {
-            track[i] = true;
+            track[trackNumber][i] = true;
             remainder += length[trackNumber];
         }
         else
         {
-            track[i] = false
+            track[trackNumber][i] = false;
         }
         remainder -= pulses[trackNumber];
     }
@@ -246,41 +244,48 @@ void touchStart (int index, float x, float y, float z, float vz)
         int xPixel = convertPositionToPixel(x);
         int yPixel = convertPositionToPixel(y);
 
+        log(xPixel);
+        log(yPixel);
+
         if (yPixel < 3 && xPixel % 4 != 3)                           // digit up
         {
+            bool returnToPlaying = playing[activeTrack];
             playing[activeTrack] = false;
-            if (xPixel < 7)
+
+            if (xPixel < 7)                                       // more pulses
             {
-                pulses[activeTrack] += (xPixel < 1 ? 10 : 1);
+                pulses[activeTrack] += (xPixel < 4 ? 10 : 1);
                 pulses[activeTrack] = min(99, pulses[activeTrack]);
-                length[activeTrack] = min(pulses[activeTrack],
+                length[activeTrack] = max(pulses[activeTrack],
                                           length[activeTrack]);
             }
-            else if (xPixel > 7)
+            else if (xPixel > 7)                                 // longer track
             {
-                length[activeTrack] += (xPixel < 1 ? 10 : 1);
-                length[activeTrack] = min(99, pulses[activeTrack]);
+                length[activeTrack] += (xPixel < 11 ? 10 : 1);
+                length[activeTrack] = min(99, length[activeTrack]);
             }
             updateTrack(activeTrack);
-            playing[activeTrack] = true;
+            playing[activeTrack] = returnToPlaying;
         }
         else if (3 < yPixel && yPixel < 5 && xPixel % 4 != 3)      // digit down
         {
+            bool returnToPlaying = playing[activeTrack];
             playing[activeTrack] = false;
-            if (xPixel < 7)
+
+            if (xPixel < 7)                                      // fewer pulses
             {
-                pulses[activeTrack] -= (xPixel < 1 ? 10 : 1);
+                pulses[activeTrack] -= (xPixel < 4 ? 10 : 1);
                 pulses[activeTrack] = max(0, pulses[activeTrack]);
             }
-            else if (xPixel > 7)
+            else if (xPixel > 7)                                // shorter track
             {
-                length[activeTrack] -= (xPixel < 1 ? 10 : 1);
-                length[activeTrack] = max(1, pulses[activeTrack]);
+                length[activeTrack] -= (xPixel < 11 ? 10 : 1);
+                length[activeTrack] = max(1, length[activeTrack]);
                 pulses[activeTrack] = min(pulses[activeTrack],
                                           length[activeTrack]);
             }
             updateTrack(activeTrack);
-            playing[activeTrack] = true;
+            playing[activeTrack] = returnToPlaying;
         }
         else if (5 < yPixel && yPixel < 9)                        // move slider
         {
@@ -298,6 +303,7 @@ void touchMove (int index, float x, float y, float z, float vz)
 {
     if (index == 1 && sliderActive)
     {
+        int xPixel = convertPositionToPixel(x);
         sliderX = xPixel;
     }
 }
