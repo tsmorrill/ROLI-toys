@@ -1,0 +1,54 @@
+/*
+<metadata description=""
+    details=""
+    target=""
+    tags="">
+    <groups>
+    </groups>
+    <variables>
+    </variables>
+</metadata>
+*/
+
+//-Declare Variables------------------------------------------------------------
+
+//-Initialise-------------------------------------------------------------------
+
+void initialise()
+{
+
+}
+
+//-Repaint----------------------------------------------------------------------
+
+void repaint
+{
+
+}
+
+//-Handle Button----------------------------------------------------------------
+
+void handleButtonDown(int index)
+{
+
+}
+
+void handleButtonUp(int index)
+{
+
+}
+
+//-Handle Touch-----------------------------------------------------------------
+
+void touchStart (int index, float x, float y, float z, float vz)
+{
+
+}
+void touchMove (int index, float x, float y, float z, float vz)
+{
+
+}
+void touchEnd (int index, float x, float y, float z, float vz)
+{
+
+}
