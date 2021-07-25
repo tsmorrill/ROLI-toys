@@ -220,9 +220,22 @@ int convertPositionToPixel (float pos)                   // copied from pselodux
     return int ((map(pos, 0.0, 1.9, 0.15, 4.7)) * 3);
 }
 
-void updateTrack();
+void updateTrack(int trackNumber);                      // Bresenham's algorithm
 {
-
+    int remainder  = -pulses[trackNumber];
+    for (int i = 0; i < length[trackNumber], ++i)
+    {
+        if (remainder < 0)
+        {
+            track[i] = true;
+            remainder += length[trackNumber];
+        }
+        else
+        {
+            track[i] = false
+        }
+        remainder -= pulses[trackNumber];
+    }
 }
 
 void touchStart (int index, float x, float y, float z, float vz)
