@@ -1,11 +1,11 @@
 /*
 <metadata description="Euclidean Rhythm Generator"
-    details=""
+    details="Four tracks of Euclidean rhythms with length up to 99."
     target="Lightpad"
     tags="MIDI;Generator;">
     <groups>
-        <group name="note"    displayName="Notes" />
-        <group name="colour"    displayName="Colors" />
+        <group name="note"   displayName="Notes" />
+        <group name="colour" displayName="Colors" />
     </groups>
     <variables>
         <variable name="channel" displayName="MIDI Channel" type="int" min="1" max="16" value="1" />
@@ -19,7 +19,6 @@
         <variable group="colour" name="colour1" displayName="Color 2" type="colour" value="0x000080" />
         <variable group="colour" name="colour2" displayName="Color 3" type="colour" value="0x008000" />
         <variable group="colour" name="colour3" displayName="Color 4" type="colour" value="0x808000" />
-        <variable group="colour" name="colour4" displayName="Color 5" type="colour" value="0x808080" />
     </variables>
 </metadata>
 */
@@ -39,7 +38,6 @@ int  length[4], pulses[4], position[4];
 // UI
 bool sliderActive;
 int  activeTrack, sliderX;
-
 
 //-Initialise-------------------------------------------------------------------
 
@@ -166,6 +164,7 @@ void repaint()
     fillRect(0x080808, 0, 7, 15, 1);
     fillRect(0x808080, sliderX, 6, 1, 3);
 
+    // draw play/pause
     for (int i = 0; i < 4; ++i)
     {
         if (playing[i])
@@ -182,7 +181,8 @@ void repaint()
         }
         else
         {
-            fillRect(colour[i],  4*i, 11, 3, 3);
+            fillRect(colour[i],  4*i,     11, 1, 3);
+            fillRect(colour[i],  4*i + 2, 11, 1, 3);
         }
     }
 
@@ -223,6 +223,7 @@ int convertPositionToPixel (float pos)                   // copied from pselodux
 void updateTrack(int trackNumber);                      // Bresenham's algorithm
 {
     int remainder  = -pulses[trackNumber];
+
     for (int i = 0; i < length[trackNumber], ++i)
     {
         if (remainder < 0)
@@ -260,24 +261,26 @@ void touchStart (int index, float x, float y, float z, float vz)
                 length[activeTrack] += (xPixel < 1 ? 10 : 1);
                 length[activeTrack] = min(99, pulses[activeTrack]);
             }
+            updateTrack(activeTrack);
             playing[activeTrack] = true;
         }
         else if (3 < yPixel && yPixel < 5 && xPixel % 4 != 3)      // digit down
         {
-        playing[activeTrack] = false;
-        if (xPixel < 7)
-        {
-            pulses[activeTrack] -= (xPixel < 1 ? 10 : 1);
-            pulses[activeTrack] = max(0, pulses[activeTrack]);
-        }
-        else if (xPixel > 7)
-        {
-            length[activeTrack] -= (xPixel < 1 ? 10 : 1);
-            length[activeTrack] = max(1, pulses[activeTrack]);
-            pulses[activeTrack] = min(pulses[activeTrack],
-                                      length[activeTrack]);
-        }
-        playing[activeTrack] = true;
+            playing[activeTrack] = false;
+            if (xPixel < 7)
+            {
+                pulses[activeTrack] -= (xPixel < 1 ? 10 : 1);
+                pulses[activeTrack] = max(0, pulses[activeTrack]);
+            }
+            else if (xPixel > 7)
+            {
+                length[activeTrack] -= (xPixel < 1 ? 10 : 1);
+                length[activeTrack] = max(1, pulses[activeTrack]);
+                pulses[activeTrack] = min(pulses[activeTrack],
+                                          length[activeTrack]);
+            }
+            updateTrack(activeTrack);
+            playing[activeTrack] = true;
         }
         else if (5 < yPixel && yPixel < 9)                        // move slider
         {
