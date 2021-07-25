@@ -167,14 +167,19 @@ void repaint()
     {
         if (playing[i])
         {
+            fillRect(colour[i],  4*i,     10, 1, 5);
+            fillRect(colour[i],  4*i + 1, 11, 1, 3);
+            fillRect(colour[i],  4*i + 2, 12, 1, 1);
             if (track[i][position[i]])
             {
-                blendCircle(0x30ffffff, , , 3.5, true);
+                blendRect(0x30ffffff,  4*i,     10, 1, 5);
+                blendRect(0x30ffffff,  4*i + 1, 11, 1, 3);
+                blendRect(0x30ffffff,  4*i + 2, 12, 1, 1);
             }
         }
         else
         {
-
+            fillRect(colour[i],  4*i, 11, 3, 3);
         }
     }
 
