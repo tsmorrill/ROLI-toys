@@ -35,8 +35,9 @@ float xCoord, yCoord;
 
 // Play Control
 bool playing;
-int  sliderX, sliderY, loggedTime;
+int  sliderX, loggedTime;
 
+// Display
 int colour;
 
 //==============================================================================
@@ -148,6 +149,8 @@ void handleButtonDown (int index)
     }
 }
 
+//==============================================================================
+
 void touchStart (int index, float x, float y, float z, float vz)
 {
     if (index == 1)
@@ -162,7 +165,7 @@ void touchStart (int index, float x, float y, float z, float vz)
             colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
             xCoord = 2*x - 2;
             yCoord = y/2 - 0.5;
-            
+
             blendCircle(colour, map(xCoord, -2.0, 2.0, 0.0, 14.0), map(yCoord, -0.5, 0.5, 0.0, 14.0), 0.0, true);
         }
     }

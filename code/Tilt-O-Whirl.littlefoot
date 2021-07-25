@@ -35,18 +35,17 @@
 
 //==============================================================================
 
-int ballX[8], ballY[8], velX[8], velY[8];        // oversample grid (2^16)x
+// Simulation
 bool ballLive[8], ballBounce[8];
+int ballX[8], ballY[8], velX[8], velY[8];             // oversample grid (2^16)x
+int accX, accY, spinCount, frameCounter;
 
+//Display
 int note[8], colour[8];
 
-int ballHeld;
+// Interaction
 bool grab;
-
-int accX, accY, spinCount;
-bool hasResetOnce;
-
-int frameCounter;
+int  ballHeld;
 
 //==============================================================================
 
@@ -67,12 +66,9 @@ void initialise()
     grab = false;
     killAll();
 
-    if (! hasResetOnce)
-    {
-        setAcc();
-        setColourArray();
-        setNoteArray();
-        hasResetOnce = true;
+    setAcc();
+    setColourArray();
+    setNoteArray();
     }
 }
 
@@ -114,17 +110,14 @@ void killAll()
     }
 }
 
-void handleButtonDown(int index)
-{
-    initialise();
-}
+//==============================================================================
 
 void rotate()
 {
     float newX, newY;
 
-    newX = 0.9952*accX - 0.0980*accY;    // rotation matrix
-    newY = 0.0980*accX + 0.9952*accY;    // theta = pi/32
+    newX = 0.9952*accX - 0.0980*accY;                         // rotation matrix
+    newY = 0.0980*accX + 0.9952*accY;                           // theta = pi/32
 
     spinCount = (spinCount+1) % 64;
     log(spinCount);
@@ -293,6 +286,27 @@ void grabDeadBall()
     }
 }
 
+//==============================================================================
+
+void repaint()
+{
+    clearDisplay();
+    physics();
+    draw();
+    cleanup();
+}
+
+//==============================================================================
+
+void handleButtonDown(int index)
+{
+    killAll();
+    sendAllNotesOff();
+    grab = false;
+}
+
+//==============================================================================
+
 void touchStart (int index, float x, float y, float z, float vz)
 {
     if (index == 1)
@@ -320,12 +334,4 @@ void touchEnd (int index, float x, float y, float z, float vz)
         throwEnd(x, y);
         grab = false;
     }
-}
-
-void repaint()
-{
-    clearDisplay();
-    physics();
-    draw();
-    cleanup();
 }

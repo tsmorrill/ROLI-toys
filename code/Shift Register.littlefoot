@@ -11,23 +11,19 @@
 
 //==============================================================================
 
-int countdown;
-int countdownMax;
-int step;
-
-int buffer;
-int register;
-
-int noteNumber;
-int velocity;
-
-int line;
-
-float probability;
-
+// Clock
+int  countdown, countdownMax, step;
 bool playing;
 
-int randHeight;
+// Shift Register
+int buffer, register;
+float probability;
+
+// MIDI
+int noteNumber, velocity;
+
+// Display
+int line, randHeight;
 
 //==============================================================================
 
@@ -41,7 +37,7 @@ void initialise()
     countdownMax = (1 << 16);
     countdown = countdownMax;
     step = (1 << 14);
-    
+
     register = getRandomInt(1<<16);
     line = 0;
     probability = 0;
@@ -55,18 +51,7 @@ void sendAllNotesOff()
     }
 }
 
-void handleButtonDown(int index)
-{
-    playing = ! playing;
-    if (playing)
-    {
-        update();
-    }
-    else
-    {
-        sendAllNotesOff();
-    }
-}
+//==============================================================================
 
 void tick()
 {
@@ -94,7 +79,7 @@ void print()
     fillRect (0x00000000, 8, line, 7, 1);
     if (! fixedVelocity)
     {
-    bits(0x000000ff, velocity, 8);        
+    bits(0x000000ff, velocity, 8);
     }
     bits(0xffffff00, noteNumber, 0);
     line ++;
@@ -109,7 +94,7 @@ void print()
 void update()
 {
     sendNoteOff(0, noteNumber, velocity);
-    
+
     buffer = register % 2;
     if (getRandomFloat() < probability)
     {
@@ -124,12 +109,49 @@ void update()
         velocity = register >> 8;             // visual appeal
         velocity %= 128;
     }
-    
+
     sendNoteOn(0, noteNumber, velocity);
-    
+
     print();
     countdown = countdownMax;
 }
+
+//==============================================================================
+
+void repaint()
+{
+    fillRect (0xff000000, 7, 0, 1, 14);
+    randHeight = int (probability * 15);
+    if (randHeight > 0)
+    {
+        fillRect (0x00004000, 7, 14 - randHeight + 1, 1, randHeight);
+    }
+    if (playing)
+    {
+        tick();
+        if (countdown == 0)
+        {
+            update();
+        }
+    }
+}
+
+//==============================================================================
+
+void handleButtonDown(int index)
+{
+    playing = ! playing;
+    if (playing)
+    {
+        update();
+    }
+    else
+    {
+        sendAllNotesOff();
+    }
+}
+
+//==============================================================================
 
 void doTouch (int index, float x, float y, float z, float vz)
 {
@@ -138,7 +160,7 @@ void doTouch (int index, float x, float y, float z, float vz)
          x = x/2;
          x = max(0.1, min(0.9, x));
          step = int (16*map(x, 0.1, 0.9, float (1<<8), float (1<<14)));
-        
+
          y = (2 - y)/2;
          y = max(0.1, min(0.9, y));
          probability = map(y, 0.1, 0.9);
@@ -168,23 +190,5 @@ void touchEnd (int index, float x, float y, float z, float vz)
 	if (index == 3)
     {
         initialise();
-    }
-}
-
-void repaint()
-{
-    fillRect (0xff000000, 7, 0, 1, 14);
-    randHeight = int (probability * 15);
-    if (randHeight > 0)
-    {
-        fillRect (0x00004000, 7, 14 - randHeight + 1, 1, randHeight);        
-    }
-    if (playing)
-    {
-        tick();
-        if (countdown == 0)
-        {
-            update();
-        }
     }
 }

@@ -33,6 +33,7 @@ float xCoord, yCoord;
 bool playing;
 int  sliderX, sliderY, loggedTime;
 
+// Display
 int colour;
 
 //==============================================================================
@@ -84,7 +85,7 @@ void repaint()
                 ++ yCoord;
             }
             yCoord = 1/yCoord;
-                        
+
             float tempX = xCoord*(XIsPitchBend ? 16384 : 128);
             float tempY = yCoord*128;
 
@@ -112,7 +113,7 @@ void repaint()
             }
 
             blendCircle(colour, 14*xCoord, 14 - 14*yCoord, 0.0, true);          // correct for orientation
-            
+
             if (TriggerNote)
             {
                 sendNoteOff(channel - 1, note, 0);
@@ -139,6 +140,8 @@ void handleButtonDown (int index)
     }
 }
 
+//==============================================================================
+
 void touchStart (int index, float x, float y, float z, float vz)
 {
     if (index == 1)
@@ -150,13 +153,16 @@ void touchStart (int index, float x, float y, float z, float vz)
         else
         {
             clearDisplay();
-            colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
+            colour = makeARGB(255,               getRandomInt(256),
+                              getRandomInt(256), getRandomInt(256));
             xCoord = x/2;
             yCoord = 1 - y/2;
             blendCircle(colour, 14*xCoord, 14 - 14*yCoord, 0.0, true);
         }
     }
 }
+
+//==============================================================================
 
 void touchMove (int index, float x, float y, float z, float vz)
 {

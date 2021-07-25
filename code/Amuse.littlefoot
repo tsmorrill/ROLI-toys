@@ -91,7 +91,7 @@ void setArrays()
     colour[1] = 0x000080;
     colour[2] = 0x008000;
     colour[3] = 0x808000;
-    
+
     note[0] = note0;
     note[1] = note1;
     note[2] = note2;
@@ -148,7 +148,7 @@ void drawRegister()
         }
         fillPixel(colour[i], cellX[tap[i]], cellY[tap[i]]);
     }
-    
+
     fillPixel(colour[litButton], cellX[tap[litButton]], cellY[tap[litButton]]);
 
     for (int i = 0; i<4; ++i)
@@ -213,6 +213,8 @@ void handleButtonDown (int index)
         sendAllNotesOff();
     }
 }
+
+//==============================================================================
 
 int convertPositionToPixel (float pos)              // copied from pselodux
 {
