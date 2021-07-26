@@ -343,7 +343,7 @@ void updateTrack()
     }
     else if (activeTrack == 3)
     {
-        updateTrack0();
+        updateTrack3();
     }
 }
 
