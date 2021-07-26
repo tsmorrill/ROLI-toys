@@ -25,6 +25,26 @@ Green and Yellow are output taps.
 
 Touch with three fingers and release: Randomize memory.
 
+## Bresenham
+A four-track Euclidean rhythm generator.
+Top-left number indicates the number of pulses on the active track.
+Top-right number indicates the length of the active track.
+Color of the top-right number indicates the active track.
+Outputs MIDI notes.
+Options available through the ROLI Dashboard.
+
+### Controls:
+
+Physical Button - Select active track.
+
+Tap top of digit - Increase digit.
+
+Tap bottom of digit - Decrease digit.
+
+Slider - Speed.
+
+Touch Pads - Play/pause.
+
 ## Gauss
 A MIDI CC generator using the Gauss continued fraction map.
 Outputs MIDI CC, channel pressure, or pitchbend.

@@ -1,6 +1,6 @@
 /*
-<metadata description="Euclidean Rhythm Generator"
-    details="Four tracks of Euclidean rhythms with length up to 99."
+<metadata description="Demonstrate a glitch with doubly-indexed arrays."
+    details="Not actually for making music."
     target="Lightpad"
     tags="MIDI;Generator;">
     <groups>
