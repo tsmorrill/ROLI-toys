@@ -212,7 +212,7 @@ void repaint()
             if (playing[2])
             {
                 position[2] = (position[2]+1) % length[2];
-                if (track0[position[2]])
+                if (track2[position[2]])
                 {
                     sendNoteOn (channel - 1, note[2], 127);
                     blendRect(0x30ffffff,  8, 10, 1, 5);
@@ -224,7 +224,7 @@ void repaint()
             if (playing[3])
             {
                 position[3] = (position[3]+1) % length[3];
-                if (track0[position[3]])
+                if (track3[position[3]])
                 {
                     sendNoteOn (channel - 1, note[3], 127);
                     blendRect(0x30ffffff,  12, 10, 1, 5);
@@ -374,7 +374,7 @@ void touchStart (int index, float x, float y, float z, float vz)
             updateTrack();
             playing[activeTrack] = returnToPlaying;
         }
-        else if (3 < yPixel && yPixel < 5 && xPixel % 4 != 3)      // digit down
+        else if (3 < yPixel && yPixel < 6 && xPixel % 4 != 3)      // digit down
         {
             bool returnToPlaying = playing[activeTrack];
             playing[activeTrack] = false;
