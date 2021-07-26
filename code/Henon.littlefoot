@@ -42,12 +42,23 @@ int colour;
 
 //==============================================================================
 
+void drawParticle()
+{
+    float tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
+    float tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
+    
+    // correct for orientation
+    blendCircle(colour, tempX, 14 - tempY, 0.0, true);
+}
+
 void initParams()
 {
     clearDisplay();
-    colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
+    colour = makeARGB(255,               getRandomInt(256),
+                      getRandomInt(256), getRandomInt(256));
     xCoord = 4*(getRandomFloat() - 0.5);
     yCoord =   (getRandomFloat() - 0.5);
+    drawParticle();
 }
 
 void initialise()
@@ -115,13 +126,10 @@ void repaint()
 
             if (TriggerNote)
             {
-                sendNoteOn(channel-1, note, int (tempY));
+                sendNoteOn(channel - 1, note, int (tempY));
             }
 
-            tempX = map(xCoord, -2.0, 2.0, 0.0, 14.0);
-            tempY = map(yCoord, -0.5, 0.5, 0.0, 14.0);
-
-            blendCircle(colour, tempX, 14 - tempY, 0.0, true);          // correct for orientation
+            drawParticle();
 
             if (TriggerNote)
             {
@@ -162,11 +170,12 @@ void touchStart (int index, float x, float y, float z, float vz)
         else
         {
             clearDisplay();
-            colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
+            colour = makeARGB(255,               getRandomInt(256),
+                              getRandomInt(256), getRandomInt(256));
             xCoord = 2*x - 2;
             yCoord = y/2 - 0.5;
 
-            blendCircle(colour, map(xCoord, -2.0, 2.0, 0.0, 14.0), map(yCoord, -0.5, 0.5, 0.0, 14.0), 0.0, true);
+            drawParticle();
         }
     }
 }

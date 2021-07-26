@@ -38,11 +38,20 @@ int colour;
 
 //==============================================================================
 
+void drawParticle()
+{
+    // correct for orientation
+    blendCircle(colour, 14*xCoord, 14 - 14*yCoord, 0.0, true);  
+}
+
 void initParams()
 {
-    colour = makeARGB(255, getRandomInt(256), getRandomInt(256), getRandomInt(256));
+    colour = makeARGB(255,               getRandomInt(256),
+                      getRandomInt(256), getRandomInt(256));
     xCoord = getRandomFloat();
     yCoord = getRandomFloat();
+    drawParticle();
+    
 }
 
 void initialise()
@@ -112,7 +121,7 @@ void repaint()
                 sendNoteOn(channel-1, note, int (tempY));
             }
 
-            blendCircle(colour, 14*xCoord, 14 - 14*yCoord, 0.0, true);          // correct for orientation
+            drawParticle();
 
             if (TriggerNote)
             {
@@ -157,7 +166,7 @@ void touchStart (int index, float x, float y, float z, float vz)
                               getRandomInt(256), getRandomInt(256));
             xCoord = x/2;
             yCoord = 1 - y/2;
-            blendCircle(colour, 14*xCoord, 14 - 14*yCoord, 0.0, true);
+            drawParticle();
         }
     }
 }
