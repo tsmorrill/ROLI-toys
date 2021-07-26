@@ -349,11 +349,11 @@ void updateTrack()
 
 void touchStart (int index, float x, float y, float z, float vz)
 {
+    int xPixel = convertPositionToPixel(x);
+    int yPixel = convertPositionToPixel(y);
+    
     if (index == 1)
     {
-        int xPixel = convertPositionToPixel(x);
-        int yPixel = convertPositionToPixel(y);
-
         if (yPixel < 3 && xPixel % 4 != 3)                           // digit up
         {
             bool returnToPlaying = playing[activeTrack];
@@ -399,14 +399,15 @@ void touchStart (int index, float x, float y, float z, float vz)
             sliderX = xPixel;
             sliderActive = true;
         }
-        else if (9 < yPixel && xPixel % 4 != 3)                    // play/pause
+    }
+
+    if (9 < yPixel && xPixel % 4 != 3)                             // play/pause
+    {
+        int button = xPixel / 4;
+        playing[button] = ! playing[button];
+        if (! playing[button])
         {
-            int button = xPixel / 4;
-            playing[button] = ! playing[button];
-            if (! playing[button])
-            {
-                position[button] = 0;
-            }
+            position[button] = 0;
         }
     }
 }
