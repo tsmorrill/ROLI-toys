@@ -43,7 +43,7 @@ Tap bottom of digit - Decrease digit.
 
 Slider - Speed.
 
-Touch Pads - Play/pause.
+Touch Pads - Play/Stop track.
 
 ## Gauss
 A MIDI CC generator using the Gauss continued fraction map.
@@ -83,11 +83,9 @@ Options available through the ROLI Dashboard.
 
 Physical Button - Play/Pause. MIDI panic.
 
-X-axis - Speed.
+Top Slider - Probability that a shifted bit will be inverted.
 
-Y-axis - Probability that a shifted bit will be inverted.
-
-Touch with three fingers and release: Reset
+Bottom Slider - Speed.
 
 ## Tilt-O-Whirl
 A 2D physics simulator, based on the Tombola sequencer by Teenage Engineering.

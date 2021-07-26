@@ -5,27 +5,44 @@
     tags="MIDI;Generator;">
     <variables>
         <variable name="fixedVelocity" displayName="Fixed Velocity"   type="bool"   value="false" />
+        <variable name="pitchBendMode" displayName="Pitchbend Mode"   type="bool"   value="true" />
     </variables>
 </metadata>
 */
 
 //==============================================================================
 
+// Lookup Tables
+int   msInterval[15];
+float probability[15];
+
 // Clock
-int  countdown, countdownMax, step;
+int  loggedTime;
 bool playing;
 
 // Shift Register
 int buffer, register;
-float probability;
 
 // MIDI
 int noteNumber, velocity;
+
+// UI
+bool probSliderActive, speedSliderActive;
+int  probSliderX, speedSliderX, litButton;
 
 // Display
 int line, randHeight;
 
 //==============================================================================
+
+void scrambleMemory()
+{
+    for (int i = 0; i < 15; ++i)
+    {
+        msInterval[i] = 0 + 45*(14-i);
+        probability[i] = i/14.0;
+    }
+}
 
 void initialise()
 {
@@ -34,13 +51,14 @@ void initialise()
     velocity = 127;
 
     playing = false;
-    countdownMax = (1 << 16);
-    countdown = countdownMax;
-    step = (1 << 14);
+
+    scrambleMemory();
+
+    probSliderX = 0;
+    speedSliderX = 7;
 
     register = getRandomInt(1<<16);
     line = 0;
-    probability = 0;
 }
 
 void sendAllNotesOff()
@@ -49,23 +67,21 @@ void sendAllNotesOff()
     {
         sendNoteOff(0, i, 0);
     }
+    if (pitchBendMode)
+    {
+        sendPitchBend(0, 8192);
+    }
 }
 
 //==============================================================================
 
-void tick()
-{
-    countdown -= step;
-    countdown = max(countdown, 0);
-}
-
-void bits(int argb, int value, int offset)
+void drawBits(int rgb, int value, int offset)
 {
         for (int i = 0; i < 8; ++ i)
         {
             if ((value & 1<<i) > 0)
             {
-                fillPixel(argb, 14 - i - offset, line);
+                fillPixel(rgb, 14 - i - offset, line);
             }
         }
 }
@@ -74,21 +90,19 @@ void print()
 {
     if (! fixedVelocity)
     {
-        fillRect (0x00000000, 0, line, 7, 1);
+        fillRect (0x000000, 0, line, 7, 1);
+        drawBits(0x000000ff, velocity, 8);
     }
-    fillRect (0x00000000, 8, line, 7, 1);
+    fillRect (0x000000, 8, line, 7, 1);
+    drawBits(0x00ff00, noteNumber, 0);
+
+    line = (line + 1) % 7;
+
     if (! fixedVelocity)
     {
-    bits(0x000000ff, velocity, 8);
+        fillRect (0x080000, 0, line, 7, 1);
     }
-    bits(0xffffff00, noteNumber, 0);
-    line ++;
-    line %= 15;
-    if (! fixedVelocity)
-    {
-        fillRect (0x00200000, 0, line, 7, 1);
-    }
-    fillRect (0x00200000, 8, line, 7, 1);
+    fillRect (0x080000, 8, line, 7, 1);
 }
 
 void update()
@@ -96,7 +110,7 @@ void update()
     sendNoteOff(0, noteNumber, velocity);
 
     buffer = register % 2;
-    if (getRandomFloat() < probability)
+    if (getRandomFloat() < probability[probSliderX])
     {
         buffer = 1 - buffer;
     }
@@ -104,36 +118,49 @@ void update()
     register += buffer << 15;
 
     noteNumber = register % 128;
-    if (! fixedVelocity)
+    velocity = (fixedVelocity ? 127 : (register >> 8) % 128);
+
+    if (pitchBendMode)
     {
-        velocity = register >> 8;             // visual appeal
-        velocity %= 128;
+        sendPitchBend(0, noteNumber << 7);
     }
 
-    sendNoteOn(0, noteNumber, velocity);
+    sendNoteOn(0, (pitchBendMode ? 60 : noteNumber), velocity);
 
     print();
-    countdown = countdownMax;
 }
 
 //==============================================================================
 
+bool waitedLongEnough()
+{
+    int t = getMillisecondCounter();
+    if (t - loggedTime >= msInterval[speedSliderX])
+    {
+        loggedTime = t;
+        return true
+    }
+    return false
+}
+
 void repaint()
 {
-    fillRect (0xff000000, 7, 0, 1, 14);
-    randHeight = int (probability * 15);
-    if (randHeight > 0)
-    {
-        fillRect (0x00004000, 7, 14 - randHeight + 1, 1, randHeight);
-    }
     if (playing)
     {
-        tick();
-        if (countdown == 0)
+        if (waitedLongEnough())
         {
             update();
         }
     }
+
+    // clear sliders
+    fillRect(0x000000, 0, 8, 15, 7);
+
+    // draw sliders
+    fillRect(0x080800, 0,            9,  15, 1);
+    fillRect(0x808000, probSliderX,  8,  1, 3);
+    fillRect(0x080808, 0,            13, 15, 1);
+    fillRect(0x808080, speedSliderX, 12,  1, 3);
 }
 
 //==============================================================================
@@ -143,6 +170,7 @@ void handleButtonDown(int index)
     playing = ! playing;
     if (playing)
     {
+        loggedTime = getMillisecondCounter();
         update();
     }
     else
@@ -153,42 +181,58 @@ void handleButtonDown(int index)
 
 //==============================================================================
 
-void doTouch (int index, float x, float y, float z, float vz)
+int convertPositionToPixel (float pos)              // copied from pselodux
 {
-    if (index == 1)
-    {
-         x = x/2;
-         x = max(0.1, min(0.9, x));
-         step = int (16*map(x, 0.1, 0.9, float (1<<8), float (1<<14)));
-
-         y = (2 - y)/2;
-         y = max(0.1, min(0.9, y));
-         probability = map(y, 0.1, 0.9);
-         if (probability < 0.05)
-         {
-            probability = 0.0;
-         }
-         if (probability > 0.95)
-         {
-            probability = 1.0;
-         }
-    }
+    return int ((map(pos, 0.0, 1.9, 0.15, 4.7)) * 3);
 }
 
 void touchStart (int index, float x, float y, float z, float vz)
 {
-	doTouch (index, x, y, z, vz);
+	if (index == 1)
+    {
+        int xPixel = convertPositionToPixel(x);
+        int yPixel = convertPositionToPixel(y);
+
+        if (7 < yPixel && yPixel < 11)
+        {
+            probSliderActive = true;
+            probSliderX = xPixel;
+        }
+        else if (11 < yPixel)
+        {
+            speedSliderActive = true;
+            speedSliderX = xPixel;
+        }
+    }
 }
 
 void touchMove (int index, float x, float y, float z, float vz)
 {
-	doTouch (index, x, y, z, vz);
+	if (index == 1)
+    {
+        int xPixel = convertPositionToPixel(x);
+        int yPixel = convertPositionToPixel(x);
+
+        if (probSliderActive)
+        {
+            probSliderX = xPixel;
+        }
+        else if (speedSliderActive)
+        {
+            speedSliderX = xPixel;
+        }
+    }
 }
 
 void touchEnd (int index, float x, float y, float z, float vz)
 {
-	if (index == 3)
+    if (index == 1)
     {
-        initialise();
+        probSliderActive = false;
+        speedSliderActive = false;
+    }
+	else if (index == 3)
+    {
+        scrambleMemory();
     }
 }
