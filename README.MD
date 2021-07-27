@@ -1,6 +1,6 @@
 # ROLI-toys
 
-Small apps for the ROLI Lightpad.
+Small apps for the ROLI Lightpad. Demonstration: https://www.youtube.com/watch?v=M7KvD-Oi08U
 
 To install:
 Copy the desired .littlefoot file to your Documents/ROLI/Littlefoot/ directory.
@@ -98,6 +98,6 @@ Options available through the ROLI Dashboard.
 
 Physical Button - Delete all balls. MIDI panic.
 
-Tap - Spawn a new ball
+Tap - Spawn a new ball.
 
-Drag and release - Throw a new ball
+Drag and release - Throw a new ball.
